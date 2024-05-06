@@ -1,26 +1,41 @@
 import React, { useState } from "react";
 import { EyeOff, Eye } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { Link, NavLink } from "react-router-dom";
 
 export default function Login() {
-  const [userName, setUserName] = useState("");
+  const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const onsubmit = (e) => {
+  const onsubmit = async (e) => {
     e.preventDefault();
 
-    const loginData = {
-      userName,
-      email,
-      password,
-    };
+    try {
+      const formData = {
+        username,
+        email,
+        password,
+      };
+
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/users/login",
+        formData
+      );
+      setSuccessMessage(response.data.message);
+      toast.success(response.data.message);
+    } catch (error) {
+      console.log("🚀 ~ onsubmit ~ error:", error);
+      toast.error(error.response.data.message);
+    }
 
     setUserName("");
     setEmail("");
     setPassword("");
-
-    console.log("🚀 ~ loginData ~ loginData:", loginData);
   };
 
   const togglePasswordVisibility = () => {
@@ -40,7 +55,8 @@ export default function Login() {
             Login
           </h2>
         </div>
-
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <form method="POST" action="#">
@@ -57,7 +73,7 @@ export default function Login() {
                     placeholder="John Doe"
                     type="text"
                     required=""
-                    value={userName}
+                    value={username}
                     className="text-black font-bold appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                     onChange={(e) => setUserName(e.target.value)}
                   />
@@ -115,7 +131,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <div
-                    className="mt-[345px] mr-[90px] absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                    className="mt-[315px] mr-[90px] absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
                     onClick={togglePasswordVisibility}
                   >
                     {showPassword ? (
@@ -125,6 +141,12 @@ export default function Login() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="flex justify-center text-black p-1 leading-5">
+                <a href=""className="text-gray-600 font-bold hover:text-[#2563EB]">
+                  <NavLink to="/forgotPass">Forgot Password ?</NavLink>
+                </a>
               </div>
 
               <div className="mt-6">

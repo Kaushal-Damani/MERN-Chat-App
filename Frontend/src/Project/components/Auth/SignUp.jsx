@@ -1,28 +1,48 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { EyeOff, Eye } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function SiignUp() {
-  const [userName, setUserName] = useState("");
+  const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const onsubmit = (e) => {
+  const onsubmit = async (e) => {
     e.preventDefault();
-    const signUpData = {
-      userName,
-      email,
-      password,
-      avatar,
-    };
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", avatar);
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("password", password);
 
-    console.log("🚀 ~ onsubmit ~ signUpData:", signUpData);
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/users/register",
+        formData
+      );
+      setLoading(false);
+      setSuccessMessage(response.data.message);
+    } catch (error) {
+      setLoading(false);
+      toast.error(error.response.data.message);
+    }
 
     setUserName("");
     setEmail("");
     setPassword("");
     setAvatar("");
+  };
+
+  const handleFileChange = (e) => {
+    setAvatar(e.target.files[0]);
   };
 
   const togglePasswordVisibility = () => {
@@ -31,7 +51,7 @@ export default function SiignUp() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <img
             className="mx-auto h-10 w-auto"
@@ -42,6 +62,8 @@ export default function SiignUp() {
             Create a new account
           </h2>
         </div>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
@@ -55,11 +77,11 @@ export default function SiignUp() {
                 </label>
                 <div className="mt-1 flex rounded-md shadow-sm">
                   <input
-                    name="userName"
+                    name="username"
                     placeholder="John Doe"
                     type="text"
                     required=""
-                    value={userName}
+                    value={username}
                     className="text-black font-bold appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
                     onChange={(e) => setUserName(e.target.value)}
                   />
@@ -142,8 +164,8 @@ export default function SiignUp() {
                     type="file"
                     required=""
                     accept="image/*"
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-                    onChange={(e) => setAvatar(e.target.files[0])}
+                    className="appearance-none text-black font-bold block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+                    onChange={handleFileChange}
                   />
                 </div>
               </div>
@@ -154,6 +176,7 @@ export default function SiignUp() {
                     type="submit"
                     className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out"
                     onClick={onsubmit}
+                    isloading="false"
                   >
                     Create account
                   </button>

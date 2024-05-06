@@ -8,7 +8,7 @@ export default function HomePage() {
     <>
       <div className="flex justify-center mt-[50px]">
         <Box className="w-[500px] py-4 text-white">
-          <Tabs
+          <Tabs   
             variant="soft-rounded"
             colorScheme="green"
             className="flex justify-center"
